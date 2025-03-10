@@ -40,7 +40,8 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
             for (Vector2d* point : { &A, &B, &C }) {
                 double orig_value = (*point)[coord];  // Запоминаем старое значение
                 double grad = 0.0;
-
+                // сложность, поняла из этой версии , что шаг итерации для каждой координаты должен быть отдельный и меняться.Иначе то в минус уходит , то начинает уходить от правильного ответа
+                //буду думать как это объяснить машине
                 for (int i = 0; i < 3; i++) {
                     Vector2d DEF = DEF_points[i];
                     double normA_DEF = (A - DEF).norm();
@@ -66,7 +67,8 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
             }
         }
     }
-}git push origin main git --version
+}
+
 
 
 // реализуем градиентный спуск
