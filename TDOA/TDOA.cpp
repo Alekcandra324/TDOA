@@ -66,7 +66,7 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
             }
         }
     }
-}
+}git push origin main git --version
 
 
 // реализуем градиентный спуск
@@ -74,7 +74,7 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
 // функция должна выдать новые координаты , которые будут более правильными -> функция ошибки уменьшиться
 
 int main() {
-    setlocale(LC_ALL, "");
+    
 
     // Известные точки D, E, F
     vector<Vector2d> DEF_points = { {40, 60}, {46, 52}, {34, 87} };
