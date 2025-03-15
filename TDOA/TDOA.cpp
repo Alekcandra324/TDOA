@@ -74,7 +74,6 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
                    
                     
                 }
-                double cost = loss_function(A, B, C, DEF_points, distance_diff);
                 (*point)[coord] -= step_sizes[point][coord] * grad;
                 double new_cost = loss_function(A, B, C, DEF_points, distance_diff);
                 if (new_cost - cost > 0) {
