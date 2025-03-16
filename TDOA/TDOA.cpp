@@ -30,29 +30,31 @@ double loss_function(Vector2d A, Vector2d B, Vector2d C, const vector<Vector2d>&
 
 }
 
-void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d>& DEF_points, const vector<double>& distance_diff, double step, int iterations) {
-    double accuracy = 0.01;
-    
+void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d>& DEF_points, const vector<double>& distance_diff,  int iterations) {
+    //double accuracy = 0.001;
+    unordered_map<Vector2d*, array<double, 2>> step_sizes = {
+    { &A, {0.01, 0.01} },
+    { &B, {0.001, 0.001} },
+    { &C, {0.001, 0.001} }//добавила отдельные шаги
+
+    };
+
     //предыдущий код работал неправильно, хотя математически мне казалось я реализовала его верно, однако ошибка с каждой итерацией росла.
     // необходимо было внимательнее читать википедию
     // буду реализовать Метод покоординатного спуска Гаусса — Зейделя
     //для этого я буду искать каждую координату поотдельности.
     for (int iter = 0; iter < iterations; iter++) {
-        unordered_map<Vector2d*, array<double, 2>> step_sizes = {
-    { &A, {step, step} },
-    { &B, {step, step} },
-    { &C, {step, step} }//добавила отдельные шаги
+        double max_change = 0.0;
+        
 
-        };
-       
         for (int coord = 0; coord < 2; coord++) { // 0 - x, 1 - y
-            for (Vector2d* point : { &A, &B, &C }) {
-                double orig_value = (*point)[coord];  // Запоминаем старое значение
+            for (Vector2d* point : { &C, &B,&A }) {
+
                 double grad = 0.0;
-                
+
 
                 // сложность, поняла из этой версии , что шаг итерации для каждой координаты должен быть отдельный и меняться.Иначе то в минус уходит , то начинает уходить от правильного ответа
-               
+
                 for (int i = 0; i < 3; i++) {
                     Vector2d DEF = DEF_points[i];
                     double normA_DEF = (A - DEF).norm();
@@ -71,33 +73,25 @@ void Gradient_spusk(Vector2d& A, Vector2d& B, Vector2d& C, const vector<Vector2d
                             (normB_DEF - normC_DEF - distance_diff[i * 3 + 2]) * ((C - DEF)[coord] / normC_DEF));
                     }
 
-                   
-                    
                 }
+                double orig = (*point)[coord];
+                double cost = loss_function(A, B, C, DEF_points, distance_diff);
                 (*point)[coord] -= step_sizes[point][coord] * grad;
                 double new_cost = loss_function(A, B, C, DEF_points, distance_diff);
-                if (new_cost - cost > 0) {
-
-                    while (new_cost - cost > 0) {
-                       
-                        (*point)[coord] += step_sizes[point][coord] * grad;
-                        step_sizes[point][coord] *= 0.01;
-                        (*point)[coord] -= step_sizes[point][coord] * grad;
-                        
-                        new_cost = loss_function(A, B, C, DEF_points, distance_diff);
-                        
-
-                    }
-
-
+                if (new_cost > cost) {
+                    step_sizes[point][coord] *= 0.1;
+                    (*point)[coord] = orig;
+                    (*point)[coord] -= step_sizes[point][coord] * grad;
                 }
-                else  step_sizes[point][coord] *= 1.5;
-                cout << iter << "\n";
                 
-                
-                
+                cout << "Updated " << ((point == &A) ? "A" : (point == &B) ? "B" : "C")
+                    << "[" << coord << "] to " << (*point)[coord] << ", new loss: " << new_cost << ", past loss: " << cost <<"grad "<<grad<< " step size " << step_sizes[point][coord] << "\n";         
+
             }
         }
+        cout << "Iter " << iter << " Loss: " << loss_function(A, B, C, DEF_points, distance_diff) << "\n";
+
+       // if (max_change < accuracy) break; // Условие остановки
     }
 }
 
@@ -117,15 +111,15 @@ int main() {
     vector<double> distance_diff = { 5.78,20.89 , 15.11, 5.71, 19.75, 14.04, 5.70,21.45 , 15.75 };
 
     // Начальные догадки
-    Vector2d A(10, 10), B(10, 10), C(10, 25);
+    Vector2d A(3, 3), B(8, 8), C(10, 19);
 
     // Запускаем градиентный спуск
-    Gradient_spusk(A, B, C, DEF_points, distance_diff, 1, 10000);
+    Gradient_spusk(A, B, C, DEF_points, distance_diff,  500);
 
     // Вывод результата
     cout << "A: (" << A.x() << ", " << A.y() << ")\n";
     cout << "B: (" << B.x() << ", " << B.y() << ")\n";
     cout << "C: (" << C.x() << ", " << C.y() << ")\n";
     return 0;
-    //A(0,0), B(3,5), C(8,20) 
+    
 }
