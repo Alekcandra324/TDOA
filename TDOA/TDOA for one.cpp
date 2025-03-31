@@ -35,7 +35,6 @@ void Gradient_spusk(Vector2d& A, Vector2d D, Vector2d E, Vector2d F, const vecto
             double normA_D = (A - D).norm();
             double normA_E = (A-E).norm();
             double normA_F = (A-F).norm();
-            
 
         }
 
