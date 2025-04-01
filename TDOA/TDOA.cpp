@@ -1,4 +1,4 @@
-﻿/*#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <cmath>
 #include <Eigen/Dense>
@@ -122,84 +122,4 @@ int main() {
     cout << "C: (" << C.x() << ", " << C.y() << ")\n";
     return 0;
     
-}
-*/
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <Eigen/Dense>
-#include <unordered_map>
-using namespace std;
-using namespace Eigen;
-//изучив немного теории, решила начать сначала, написать программу для нахождения координат одной антенны, затем реализовать для трех.
-//интеренет говорит, что для нелинейной системы лучше подходит или обычный GD  или SGD, а я похоже запуталась, поэтому реализую просто GD
-
-
-//первые две функции не отличаются от предыдущего кода, почти.Разница в том, что гиперболу я рассчитываю как разницу между расстояниями (от А до D) и (от А до Е) например, а не как разницу расстояний двух антенн до одного и того же источника.
-double evclid(Vector2d point1, Vector2d point2) {
-    return (point1 - point2).norm();
-}
-
-double loss_function(Vector2d A, Vector2d D, Vector2d E, Vector2d F, const vector<double>& distance_diff) {
-    double mistake = 0.0;
-    //0- D,1-E,2-F
-    mistake += pow(evclid(A, D) - evclid(A, E) - distance_diff[0], 2);
-    mistake += pow(evclid(A, D) - evclid(A, F) - distance_diff[1], 2);
-    mistake += pow(evclid(A, E) - evclid(A, F) - distance_diff[2], 2);
-    return mistake;
-}
-
-
-
-void Gradient_spusk(Vector2d& A, Vector2d D, Vector2d E, Vector2d F, const vector<double>& distance_diff, int iterations) {
-    double step_sizes[2] = { 0.001, 0.0001 };
-
-    //θ(t + 1) = θ(t)−α⋅∇f(θ(t)) реализовать надо вот это
-    for (int iter = 0; iter < iterations; iter++) {
-        //получается  teta  это или x  или y 
-        for (int coord = 0; coord < 2; coord++) {
-            // тогда выходит три градиента за один проход для  x и y. 
-            double old_loss = loss_function(A, D, E, F, distance_diff);
-
-            double grad = 0.0;
-            double normA_D = (A - D).norm();
-            double normA_E = (A - E).norm();
-            double normA_F = (A - F).norm();
-            grad += 2 * (normA_D - normA_E - distance_diff[0]) * ((A - D)[coord] / normA_D - (A - E)[coord] / normA_E);
-            grad += 2 * (normA_D - normA_F - distance_diff[1]) * ((A - D)[coord] / normA_D - (A - F)[coord] / normA_F);
-            grad += 2 * (normA_E - normA_F - distance_diff[2]) * ((A - E)[coord] / normA_E - (A - F)[coord] / normA_F);
-            double old_coord = A[coord];
-            A[coord] -= step_sizes[coord] * grad;
-           
-        
-
-        }
-    }
-
-}
-
-int main() {
-
-    // Разности хода сигнала 
-    vector<double> distance_diff;
-    // Известные точки D, E, F
-    Vector2d D(5, 1), E(5, 8), F(7, 9);
-    //Известные координаты для А
-    Vector2d A_v(10, 6);
-    distance_diff.push_back((A_v - D).norm() - (A_v - E).norm());
-    distance_diff.push_back((A_v - D).norm() - (A_v - F).norm());
-    distance_diff.push_back((A_v - E).norm() - (A_v - F).norm());
-
-    // Начальные догадки
-    Vector2d A(3, 7);
-    // нашел просто идеально координаты A_v(5, 1) при шаге для каждой 0.00001 и 10000 итераций и ошибка = 10^(-10)
-    // при тех же параметрах для A_v(4, 6) плохо работает.
-    // Запускаем градиентный спуск
-    Gradient_spusk(A, D, E, F, distance_diff, 100000);
-
-    // Вывод результата
-    cout << "A: (" << A.x() << ", " << A.y() << ")\n";
-    cout << loss_function(A, D, E, F, distance_diff);
-    return 0;
-
 }
